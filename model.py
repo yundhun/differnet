@@ -39,6 +39,8 @@ class DifferNet(nn.Module):
         for s in range(c.n_scales):
             x_scaled = F.interpolate(x, size=c.img_size[0] // (2 ** s)) if s > 0 else x
             feat_s = self.feature_extractor.features(x_scaled)
+            #Need to implement - statistical dimensionality reduction
+            feat_s = feat_s[:c.n_feat_sd,:,:]
             y_cat.append(torch.mean(feat_s, dim=(2, 3)))
 
         y = torch.cat(y_cat, dim=1)
