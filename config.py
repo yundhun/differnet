@@ -28,7 +28,9 @@ n_coupling_blocks = 8
 fc_internal = 2048 # number of neurons in hidden layers of s-t-networks
 dropout = 0.0 # dropout in s-t-networks
 lr_init = 2e-4
-n_feat = 256 * n_scales # do not change except you change the feature extractor
+n_feat_full = 256
+n_feat_sd = 256
+n_feat = n_feat_sd * n_scales # do not change except you change the feature extractor
 
 # dataloader parameters
 n_transforms = 4 # number of transformations per sample in training
