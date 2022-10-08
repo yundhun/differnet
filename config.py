@@ -7,9 +7,9 @@ import torch
 torch.cuda.set_device(0)
 
 # data settings
-dataset_path = "dummy_dataset"
-class_name = "dummy_class"
-modelname = "dummy_test"
+dataset_path = "/content/drive/MyDrive/mvtec_ad/data/images/"
+class_name = "capsule"
+modelname = "capsule_model"
 
 img_size = (448, 448)
 img_dims = [3] + list(img_size)
@@ -29,7 +29,7 @@ fc_internal = 2048 # number of neurons in hidden layers of s-t-networks
 dropout = 0.0 # dropout in s-t-networks
 lr_init = 2e-4
 n_feat_full = 256
-n_feat_sd = 256
+n_feat_sd = 128
 n_feat = n_feat_sd * n_scales # do not change except you change the feature extractor
 
 # dataloader parameters
