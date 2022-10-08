@@ -7,9 +7,9 @@ import config as c
 from multi_transform_loader import ImageFolderMultiTransform
 
 
-def get_random_transforms():
+def get_random_transforms(transf_rotations):
     augmentative_transforms = []
-    if c.transf_rotations:
+    if transf_rotations:
         augmentative_transforms += [transforms.RandomRotation(180)]
     if c.transf_brightness > 0.0 or c.transf_contrast > 0.0 or c.transf_saturation > 0.0:
         augmentative_transforms += [transforms.ColorJitter(brightness=c.transf_brightness, contrast=c.transf_contrast,
@@ -45,7 +45,7 @@ def get_loss(z, jac):
     return torch.mean(0.5 * torch.sum(z ** 2, dim=(1,)) - jac) / z.shape[1]
 
 
-def load_datasets(dataset_path, class_name):
+def load_datasets(dataset_path, class_name, transf_rotations=c.transf_rotations):
     '''
     Expected folder/file format to find anomalies of class <class_name> from dataset location <dataset_path>:
 
@@ -84,6 +84,7 @@ def load_datasets(dataset_path, class_name):
 
     data_dir_train = os.path.join(dataset_path, class_name, 'train')
     data_dir_test = os.path.join(dataset_path, class_name, 'test')
+    data_dir_train_fake_ng = os.path.join(dataset_path, class_name, 'train_fake_ng')
 
     classes = os.listdir(data_dir_test)
     if 'good' not in classes:
@@ -99,18 +100,22 @@ def load_datasets(dataset_path, class_name):
             class_perm.append(class_idx)
             class_idx += 1
 
-    transform_train = get_random_transforms()
+    transform_train = get_random_transforms(transf_rotations)
 
     trainset = ImageFolderMultiTransform(data_dir_train, transform=transform_train, n_transforms=c.n_transforms)
+    
     testset = ImageFolderMultiTransform(data_dir_test, transform=transform_train, target_transform=target_transform,
                                         n_transforms=c.n_transforms_test)
-    return trainset, testset
+    fake_ng_trainset = ImageFolderMultiTransform(data_dir_train_fake_ng, transform=transform_train, n_transforms=c.n_transforms)
+
+    return trainset, testset, fake_ng_trainset
 
 
-def make_dataloaders(trainset, testset):
-    trainloader = torch.utils.data.DataLoader(trainset, pin_memory=True, batch_size=c.batch_size, shuffle=True,
+def make_dataloaders(trainset, testset, shuffle=True):
+    #batch_size = 24
+    trainloader = torch.utils.data.DataLoader(trainset, pin_memory=True, batch_size=c.batch_size, shuffle=shuffle,
                                               drop_last=False)
-    testloader = torch.utils.data.DataLoader(testset, pin_memory=True, batch_size=c.batch_size_test, shuffle=True,
+    testloader = torch.utils.data.DataLoader(testset, pin_memory=True, batch_size=c.batch_size_test, shuffle=shuffle,
                                              drop_last=False)
     return trainloader, testloader
 
