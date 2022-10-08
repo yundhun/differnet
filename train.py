@@ -7,6 +7,7 @@ import config as c
 from localization import export_gradient_maps
 from model import DifferNet, save_model, save_weights
 from utils import *
+import time
 
 
 class Score_Observer:
@@ -31,8 +32,8 @@ class Score_Observer:
                                                                                self.max_epoch))
 
 
-def train(train_loader, test_loader):
-    model = DifferNet()
+def train(train_loader, test_loader, sd_dims):
+    model = DifferNet(sd_dims)
     optimizer = torch.optim.Adam(model.nf.parameters(), lr=c.lr_init, betas=(0.8, 0.8), eps=1e-04, weight_decay=1e-5)
     model.to(c.device)
 
@@ -40,15 +41,24 @@ def train(train_loader, test_loader):
 
     for epoch in range(c.meta_epochs):
 
+        start_time_me = time.time()
         # train some epochs
         model.train()
         if c.verbose:
             print(F'\nTrain epoch {epoch}')
         for sub_epoch in range(c.sub_epochs):
+            start_time_se = time.time()
             train_loss = list()
             for i, data in enumerate(tqdm(train_loader, disable=c.hide_tqdm_bar)):
                 optimizer.zero_grad()
                 inputs, labels = preprocess_batch(data)  # move to device and reshape
+
+                #inputs[0,:,:,:].reshape(-1,)
+
+                #print('sub_epoch:', sub_epoch,
+                #    'data[0].shape:', data[0].shape, 'data[1].shape:', data[1].shape,
+                #    'inputs.shape:', inputs.shape, 'labels.shape:', labels.shape)
+
                 # TODO inspect
                 # inputs += torch.randn(*inputs.shape).cuda() * c.add_img_noise
 
@@ -60,7 +70,9 @@ def train(train_loader, test_loader):
 
             mean_train_loss = np.mean(train_loss)
             if c.verbose:
-                print('Epoch: {:d}.{:d} \t train loss: {:.4f}'.format(epoch, sub_epoch, mean_train_loss))
+                elapsed_time_se = round( (time.time() - start_time_se) / 60 )
+                print('[dim(sd):{:d}] Epoch: {:d}.{:d}. elapsed time: {:d} mins \t train loss: {:.4f}'.format(c.n_feat_sd, epoch, sub_epoch, elapsed_time_se, mean_train_loss))
+                #print('Epoch: {:d}.{:d} \t train loss: {:.4f}'.format(epoch, sub_epoch, mean_train_loss))
 
         # evaluate
         model.eval()
@@ -80,7 +92,9 @@ def train(train_loader, test_loader):
 
         test_loss = np.mean(np.array(test_loss))
         if c.verbose:
-            print('Epoch: {:d} \t test_loss: {:.4f}'.format(epoch, test_loss))
+            elapsed_time_me = round( (time.time() - start_time_me) / 60 )
+            print('[dim(sd):{:d}] Epoch: {:d}. elapsed time: {:d} mins \t test_loss: {:.4f}'.format(c.n_feat_sd, epoch, elapsed_time_me, test_loss))            
+            #print('Epoch: {:d} \t test_loss: {:.4f}'.format(epoch, test_loss))
 
         test_labels = np.concatenate(test_labels)
         is_anomaly = np.array([0 if l == 0 else 1 for l in test_labels])
