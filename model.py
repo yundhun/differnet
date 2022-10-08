@@ -13,7 +13,10 @@ WEIGHT_DIR = './weights'
 MODEL_DIR = './models'
 
 
+#n_feat : 256 * 3
+#n_coupling_blocks : 8
 def nf_head(input_dim=c.n_feat):
+
     nodes = list()
     nodes.append(InputNode(input_dim, name='input'))
     for k in range(c.n_coupling_blocks):
@@ -28,23 +31,37 @@ def nf_head(input_dim=c.n_feat):
 
 
 class DifferNet(nn.Module):
-    def __init__(self):
+    def __init__(self, sd_dims):
         super(DifferNet, self).__init__()
         self.feature_extractor = alexnet(pretrained=True)
         self.nf = nf_head()
+        self.sd_dims = sd_dims
+        print('[DifferNet Init] sd_dims:', sd_dims)
+
+    def get_features(self, x):
+        return self.feature_extractor.features(x)
 
     def forward(self, x):
         y_cat = list()
 
+        #n_scales = 3
         for s in range(c.n_scales):
+            #print('n_scales:',s,',shape of x:',x.shape)
             x_scaled = F.interpolate(x, size=c.img_size[0] // (2 ** s)) if s > 0 else x
-            feat_s = self.feature_extractor.features(x_scaled)
-            #Need to implement - statistical dimensionality reduction
-            feat_s = feat_s[:c.n_feat_sd,:,:]
+            #print('n_scales:',s,',shape of x_scaled:',x.shape)
+            feat_s = self.feature_extractor.features(x_scaled)            
+
+            #self.sd_dims
+            feat_s = feat_s[:,self.sd_dims,:,:]
+
+            #print('n_scales:',s,',shape of feat_s:',feat_s.shape)
             y_cat.append(torch.mean(feat_s, dim=(2, 3)))
 
+        #print('shape of y_cat:',y_cat)
         y = torch.cat(y_cat, dim=1)
+        #print('shape of y:',y.shape)
         z = self.nf(y)
+        #print('shape of z:',z.shape)
         return z
 
 
