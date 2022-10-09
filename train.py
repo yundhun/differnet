@@ -71,7 +71,7 @@ def train(train_loader, test_loader, sd_dims):
             mean_train_loss = np.mean(train_loss)
             if c.verbose:
                 elapsed_time_se = round( (time.time() - start_time_se) / 60 )
-                print('[dim(sd):{:d}] Epoch: {:d}.{:d}. elapsed time: {:d} mins \t train loss: {:.4f}'.format(c.n_feat_sd, epoch, sub_epoch, elapsed_time_se, mean_train_loss))
+                #print('[dim(sd):{:d}] Epoch: {:d}.{:d}. elapsed time: {:d} mins \t train loss: {:.4f}'.format(c.n_feat_sd, epoch, sub_epoch, elapsed_time_se, mean_train_loss))
                 #print('Epoch: {:d}.{:d} \t train loss: {:.4f}'.format(epoch, sub_epoch, mean_train_loss))
 
         # evaluate
@@ -93,7 +93,7 @@ def train(train_loader, test_loader, sd_dims):
         test_loss = np.mean(np.array(test_loss))
         if c.verbose:
             elapsed_time_me = round( (time.time() - start_time_me) / 60 )
-            print('[dim(sd):{:d}] Epoch: {:d}. elapsed time: {:d} mins \t test_loss: {:.4f}'.format(c.n_feat_sd, epoch, elapsed_time_me, test_loss))            
+            print('[{:s} dim(sd):{:d}] Epoch: {:d}. elapsed time: {:d} mins \t test_loss: {:.4f}'.format(c.class_name, c.n_feat_sd, epoch, elapsed_time_me, test_loss))
             #print('Epoch: {:d} \t test_loss: {:.4f}'.format(epoch, test_loss))
 
         test_labels = np.concatenate(test_labels)
