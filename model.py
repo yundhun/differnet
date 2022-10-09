@@ -34,7 +34,7 @@ class DifferNet(nn.Module):
     def __init__(self, sd_dims):
         super(DifferNet, self).__init__()
         self.feature_extractor = alexnet(pretrained=True)
-        self.nf = nf_head()
+        self.nf = nf_head( len(sd_dims)*c.n_scales )
         self.sd_dims = sd_dims
         print('[DifferNet Init] sd_dims:', sd_dims)
 
