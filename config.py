@@ -29,7 +29,8 @@ fc_internal = 2048 # number of neurons in hidden layers of s-t-networks
 dropout = 0.0 # dropout in s-t-networks
 lr_init = 2e-4
 n_feat_full = 256
-n_feat_sd = 128
+sd_ratio = 0.8
+n_feat_sd = round(n_feat_original * sd_ratio) #reduced dimension size #ydh
 n_feat = n_feat_sd * n_scales # do not change except you change the feature extractor
 
 # dataloader parameters
