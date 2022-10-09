@@ -72,8 +72,8 @@ def get_sd(dataset_path, class_name, defectGen=False):
 		full_dim_size = features1.shape[1]
 		for i in range(batch_size):
 			for j in range(full_dim_size):
-				f1 = features1[i,j,:,:].detach().numpy().reshape(-1)
-				f2 = features2[i,j,:,:].detach().numpy().reshape(-1)
+				f1 = features1[i,j,:,:].cpu().detach().numpy().reshape(-1)
+				f2 = features2[i,j,:,:].cpu().detach().numpy().reshape(-1)
 				#print('f1==f2:',sum(f1==f2),'f1.shape:',f1.shape)
 				pvalue = scipy.stats.ttest_ind(f1, f2, equal_var=False)
 				#print('data index:',i,'dim no:',j,'pvalue:',pvalue.pvalue,'feature1.shape:',features1[i,j,:,:].shape,'f1.shape:',f1.shape)
